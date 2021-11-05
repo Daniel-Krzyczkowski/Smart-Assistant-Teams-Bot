@@ -41,6 +41,8 @@ Create two additional secrets:
 
 ![github-secrets.PNG](images/github-secrets.PNG)
 
+![infrastructure-ci-cd.png](images/infrastructure-ci-cd.png)
+
 
 ## Deploy Azure resources locally, using Visual Studio Code
 
@@ -189,6 +191,8 @@ Before app can be used it has to be accepted by Teams administrator in the admin
 # CI/CD for Azure Functions and Bot Web App
 
 Under [workflows](https://github.com/Daniel-Krzyczkowski/Smart-Assistant/tree/main/.github/workflows) folder you can find GitHub Actions script to build and deploy Azure Functions and Bot Web App.
+
+![application-ci-cd.png](images/application-ci-cd.png)
 
 
 # Additional, helpful links:
