@@ -1,0 +1,42 @@
+name: Build and deploy Azure Bot
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - src/application/**
+
+env:
+  AZURE_WEBAPP_NAME: bot-smart-assistant-dev
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+
+jobs:
+  build-and-deploy-bot-web-app:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['3.1.x']
+
+    steps:
+      # Build Bot web app 
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v1.7.2
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore ./src/application/proactive-bot/TMF/TMF.sln
+      - name: Build
+        run: dotnet build ./src/application/proactive-bot/TMF/TMF.sln --configuration Release --no-restore --output ./bot-web-app-packages
+      - name: Test
+        run: dotnet test ./src/application/proactive-bot/TMF/TMF.sln --no-restore --verbosity normal
+
+
+      # Deploy bot web app
+      - name: Deploy bot web app to Azure
+        uses: Azure/webapps-deploy@v2
+        with: 
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE  }}
+          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/bot-web-app-packages'

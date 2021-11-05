@@ -1,0 +1,43 @@
+name: Create Azure infrastructure
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - src/infrastructure/**
+
+env:
+  DEV_RESOURCE_GROUP_NAME: rg-smart-assistant-dev     
+
+jobs:
+  deploy-azure-infrastructure-for-dev-environment:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      # Checkout code
+    - uses: actions/checkout@v2
+      with:
+        ref: 'refs/heads/main'
+
+      # Log into Azure
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Create development resource group
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.0.72
+        inlineScript: |
+          az group create --location westeurope --name ${{ env.DEV_RESOURCE_GROUP_NAME }}
+
+      # Deploy Bicep file
+    - name: deploy
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        resourceGroupName: ${{ env.DEV_RESOURCE_GROUP_NAME }}
+        template: ./src/infrastructure/smart-assistant-infrastructure.bicep
+        parameters: tenantId=${{ secrets.AZURE_AD_TENANT_ID }} environmentTypeSuffix=dev msaAppIdForAzureBot=${{ secrets.MS_APP_ID_FOR_AZURE_BOT }}
+        failOnStdErr: false

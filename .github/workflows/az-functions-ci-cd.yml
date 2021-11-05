@@ -1,0 +1,42 @@
+name: Build and deploy Azure Functions
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - src/application/**
+
+env:
+  AZURE_FUNCAPP_NAME: func-smart-assistant-dev
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.'
+
+jobs:
+  build-and-deploy-azure-functions:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['3.1.x']
+
+    steps:
+      # Build Azure Function Apps 
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v1.7.2
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore ./src/application/az-functions/TMF/TMF.sln
+      - name: Build
+        run: dotnet build ./src/application/az-functions/TMF/TMF.sln --configuration Release --no-restore --output ./func-app-packages
+      - name: Test
+        run: dotnet test ./src/application/az-functions/TMF/TMF.sln --no-restore --verbosity normal
+
+
+      # Deploy Azure Function Apps
+      - name: Deploy functions apps to Azure
+        uses: Azure/functions-action@v1
+        with: 
+          app-name: ${{ env.AZURE_FUNCAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_FUNCAPP_PUBLISH_PROFILE  }}
+          package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/func-app-packages'
