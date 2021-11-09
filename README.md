@@ -1,5 +1,5 @@
 # Smart Assistant
-This repository contains source code for the smart Azure Bot which is responsible for verifying employees' working time and notifying them when they work more than 40 hours per week.
+This repository contains source code for the smart Azure Bot which is responsible for verifying employee's working time and notifying them when they work more than 40 hours per week.
 
 ![smart-assistant-bot-architecture.png](images/smart-assistant-bot-architecture.png)
 
